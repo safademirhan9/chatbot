@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import sessionRoutes from './services/session';
+import sessionRoutes from './services/ChatService';
 
 // Initialize environment variables
 dotenv.config();
