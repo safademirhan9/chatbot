@@ -1,0 +1,10 @@
+dist
+coverage
+.esbuild
+.serverless
+.venv
+node_modules
+package-lock.json
+tsconfig.base.json
+.terraform
+app/.*
