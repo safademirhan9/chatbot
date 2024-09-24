@@ -1,6 +1,5 @@
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import Session from '../model';
-import { Router } from 'express';
 
 const router = Router();
 
@@ -9,7 +8,13 @@ const questions = [
   'What is your favorite breed of cat, and why?',
   'How do you think cats communicate with their owners?',
   'Have you ever owned a cat? If so, what was their name and personality like?',
-  // Add the rest of the questions here...
+  'Why do you think cats love to sleep in small, cozy places?',
+  'What’s the funniest or strangest behavior you’ve ever seen a cat do?',
+  'Do you prefer cats or kittens, and what’s the reason for your preference?',
+  'Why do you think cats are known for being independent animals?',
+  'How do you think cats manage to land on their feet when they fall?',
+  'What’s your favorite fact or myth about cats?',
+  'How would you describe the relationship between humans and cats in three words?',
 ];
 
 // Helper function to generate sessionId
@@ -89,7 +94,7 @@ export const submitAnswer = async (req: Request, res: Response) => {
 router.post('/start', startSession);
 
 // Get the next question for a session
-router.post('/:sessionId/question', getQuestion);
+router.get('/:sessionId/question', getQuestion);
 
 // Submit an answer and get the next question
 router.post('/:sessionId/answer', submitAnswer);

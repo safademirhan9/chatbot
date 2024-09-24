@@ -1,16 +1,16 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface IQuestionAnswer {
+interface QuestionAnswer {
   question: string;
   answer: string;
 }
 
-interface ISession extends Document {
+interface Session extends Document {
   sessionId: string;
   currentQuestion: number;
   startTime: Date;
   endTime?: Date;
-  questions: IQuestionAnswer[];
+  questions: QuestionAnswer[];
 }
 
 const SessionSchema: Schema = new Schema({
@@ -26,4 +26,4 @@ const SessionSchema: Schema = new Schema({
   ],
 });
 
-export default mongoose.model<ISession>('Session', SessionSchema);
+export default mongoose.model<Session>('Session', SessionSchema);
