@@ -70,12 +70,13 @@ const Chatbot: React.FC = () => {
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="Type your answer..."
+          autoSize={{ minRows: 4, maxRows: 6 }}
         />
         <Button
           type="primary"
           onClick={submitAnswer}
-          disabled={!userAnswer || loading}
           loading={loading}
+          disabled={!userAnswer || loading}
           style={{ marginTop: '10px' }}>
           Submit Answer
         </Button>
