@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Input, Button, Steps, message, Flex } from 'antd';
+import { Layout, Input, Button, List, Typography, message, Flex } from 'antd';
 import api from '../api';
 import { AxiosResponse } from 'axios';
 
-const { Step } = Steps;
+const { Content, Footer } = Layout;
+const { Text } = Typography;
 
 const Chatbot: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string>('');
   const [userAnswer, setUserAnswer] = useState<string>('');
-  const [step, setStep] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [conversation, setConversation] = useState<{ sender: 'bot' | 'user'; text: string }[]>([]);
+  const [step, setStep] = useState<number>(0);
 
   useEffect(() => {
     startSession();
@@ -24,6 +26,7 @@ const Chatbot: React.FC = () => {
         .get(`/session/${response.data.sessionId}/question`)
         .then((response: AxiosResponse) => {
           setCurrentQuestion(response.data.question);
+          setConversation((prev) => [...prev, { sender: 'bot', text: response.data.question }]);
         })
         .catch((error) => {
           console.error(error);
@@ -36,15 +39,22 @@ const Chatbot: React.FC = () => {
   };
 
   const submitAnswer = async () => {
+    if (!userAnswer) return;
     setLoading(true);
+
     try {
-      const response = await api.post(`/session/${sessionId}/answer`, {
-        answer: userAnswer,
-      });
+      // Send user answer to the backend
+      const response = await api.post(`/session/${sessionId}/answer`, { answer: userAnswer });
+
+      // Add user's answer to the conversation
+      setConversation((prev) => [...prev, { sender: 'user', text: userAnswer }]);
+      setUserAnswer('');
+
+      // Fetch the next question
       if (response.data.nextQuestion) {
         setStep(step + 1);
         setCurrentQuestion(response.data.nextQuestion);
-        setUserAnswer('');
+        setConversation((prev) => [...prev, { sender: 'bot', text: response.data.nextQuestion }]);
       } else {
         message.success('You have completed all questions!');
       }
@@ -57,31 +67,52 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <Flex align="center" justify="center" vertical gap={10} style={{ width: '100%' }}>
-      <Steps current={step} style={{ marginTop: '20px', justifyContent: 'center', width: '50%' }}>
-        {Array.from({ length: 10 }).map((_, index) => (
-          <Step key={index} />
-        ))}
-      </Steps>
-      <Card title={`Question ${step + 1}`} bordered={false}>
-        <p>{currentQuestion}</p>
-        <Input.TextArea
-          rows={4}
-          value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
-          placeholder="Type your answer..."
-          autoSize={{ minRows: 4, maxRows: 6 }}
-        />
-        <Button
-          type="primary"
-          onClick={submitAnswer}
-          loading={loading}
-          disabled={!userAnswer || loading}
-          style={{ marginTop: '10px' }}>
-          Submit Answer
-        </Button>
-      </Card>
-    </Flex>
+    <Layout style={{ height: '100vh' }}>
+      <Content style={{ padding: '20px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '10px' }}>
+          <List
+            dataSource={conversation}
+            renderItem={(item, index) => (
+              <List.Item key={index} style={{ justifyContent: item.sender === 'bot' ? 'flex-start' : 'flex-end' }}>
+                <List.Item.Meta
+                  style={{
+                    background: item.sender === 'bot' ? '#f0f0f0' : '#1890ff',
+                    color: item.sender === 'bot' ? 'black' : 'white',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    maxWidth: '70%',
+                    textAlign: item.sender === 'bot' ? 'left' : 'right',
+                  }}
+                  description={<Text style={{ color: item.sender === 'bot' ? 'black' : 'white' }}>{item.text}</Text>}
+                />
+              </List.Item>
+            )}
+          />
+        </div>
+
+        <Footer>
+          <Flex vertical gap={10} justify="center" align="center">
+            <Input.TextArea
+              value={userAnswer}
+              autoFocus
+              onPressEnter={submitAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              placeholder="Type your answer..."
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              style={{ width: '50%' }}
+            />
+            <Button
+              type="primary"
+              onClick={submitAnswer}
+              loading={loading}
+              disabled={!userAnswer || loading}
+              style={{ width: '10%' }}>
+              Submit Answer
+            </Button>
+          </Flex>
+        </Footer>
+      </Content>
+    </Layout>
   );
 };
 
