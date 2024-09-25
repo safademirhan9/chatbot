@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Input, Button, Steps, message } from 'antd';
+import { Card, Input, Button, Steps, message, Flex } from 'antd';
 import api from '../api';
+import { AxiosResponse } from 'axios';
 
 const { Step } = Steps;
 
@@ -10,7 +11,6 @@ const Chatbot: React.FC = () => {
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [step, setStep] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [questions, setQuestions] = useState<string[]>([]);
 
   useEffect(() => {
     startSession();
@@ -20,8 +20,15 @@ const Chatbot: React.FC = () => {
     try {
       const response = await api.post('/session/start');
       setSessionId(response.data.sessionId);
-      setQuestions(response.data.questions);
-      setCurrentQuestion(response.data.questions[0]);
+      api
+        .get(`/session/${response.data.sessionId}/question`)
+        .then((response: AxiosResponse) => {
+          setCurrentQuestion(response.data.question);
+        })
+        .catch((error) => {
+          console.error(error);
+          message.error('Error fetching question');
+        });
     } catch (error) {
       console.error(error);
       message.error('Error starting session');
@@ -31,14 +38,14 @@ const Chatbot: React.FC = () => {
   const submitAnswer = async () => {
     setLoading(true);
     try {
-      const response = await api.post('/session/answer', {
-        sessionId,
+      const response = await api.post(`/session/${sessionId}/answer`, {
         answer: userAnswer,
       });
-      setStep(step + 1);
-      setCurrentQuestion(response.data.nextQuestion);
-      setUserAnswer('');
-      if (step === questions.length - 1) {
+      if (response.data.nextQuestion) {
+        setStep(step + 1);
+        setCurrentQuestion(response.data.nextQuestion);
+        setUserAnswer('');
+      } else {
         message.success('You have completed all questions!');
       }
     } catch (error) {
@@ -50,7 +57,12 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+    <Flex align="center" justify="center" vertical gap={10} style={{ width: '100%' }}>
+      <Steps current={step} style={{ marginTop: '20px', justifyContent: 'center', width: '50%' }}>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <Step key={index} />
+        ))}
+      </Steps>
       <Card title={`Question ${step + 1}`} bordered={false}>
         <p>{currentQuestion}</p>
         <Input.TextArea
@@ -68,13 +80,7 @@ const Chatbot: React.FC = () => {
           Submit Answer
         </Button>
       </Card>
-
-      <Steps current={step} style={{ marginTop: '20px' }}>
-        {questions?.map((_, index) => (
-          <Step key={index} title={`Q${index + 1}`} />
-        ))}
-      </Steps>
-    </div>
+    </Flex>
   );
 };
 
