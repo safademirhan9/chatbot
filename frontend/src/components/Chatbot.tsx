@@ -8,7 +8,6 @@ const { Text } = Typography;
 
 const Chatbot: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [currentQuestion, setCurrentQuestion] = useState<string>('');
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [conversation, setConversation] = useState<{ sender: 'bot' | 'user'; text: string }[]>([]);
@@ -25,7 +24,6 @@ const Chatbot: React.FC = () => {
       api
         .get(`/session/${response.data.sessionId}/question`)
         .then((response: AxiosResponse) => {
-          setCurrentQuestion(response.data.question);
           setConversation((prev) => [...prev, { sender: 'bot', text: response.data.question }]);
         })
         .catch((error) => {
@@ -53,7 +51,6 @@ const Chatbot: React.FC = () => {
       // Fetch the next question
       if (response.data.nextQuestion) {
         setStep(step + 1);
-        setCurrentQuestion(response.data.nextQuestion);
         setConversation((prev) => [...prev, { sender: 'bot', text: response.data.nextQuestion }]);
       } else {
         message.success('You have completed all questions!');
@@ -76,11 +73,11 @@ const Chatbot: React.FC = () => {
               <List.Item key={index} style={{ justifyContent: item.sender === 'bot' ? 'flex-start' : 'flex-end' }}>
                 <List.Item.Meta
                   style={{
-                    background: item.sender === 'bot' ? '#f0f0f0' : '#1890ff',
+                    background: item.sender === 'bot' ? '#d1d1d1' : '#1890ff',
                     color: item.sender === 'bot' ? 'black' : 'white',
                     padding: '10px',
                     borderRadius: '10px',
-                    maxWidth: '70%',
+                    maxWidth: '30%',
                     textAlign: item.sender === 'bot' ? 'left' : 'right',
                   }}
                   description={<Text style={{ color: item.sender === 'bot' ? 'black' : 'white' }}>{item.text}</Text>}
