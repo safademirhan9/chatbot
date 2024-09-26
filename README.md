@@ -1,10 +1,10 @@
 # Chatbot Application
 
+![Chatbot Screenshot](./chatbot-screenshot.jpeg)
+
 ## Project Description
 
 This project is a full-stack chatbot application that dynamically asks users questions, stores their answers in MongoDB, and displays the interaction in a user-friendly chat interface. The backend is built with Express.js and MongoDB, while the frontend uses React, Ant Design, and Axios. The application leverages the OpenAI API to generate conversational questions and provide AI-powered responses to user answers, enhancing interactivity.
-
-![Chatbot Screenshot](./chatbot-screenshot.jpeg)
 
 ## Table of Contents
 
