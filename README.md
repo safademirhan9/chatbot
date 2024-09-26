@@ -2,7 +2,7 @@
 
 ## Project Description
 
-This project is a full-stack chatbot application that asks users 10 questions, stores their answers in MongoDB, and displays the interaction in a user-friendly chat interface. The backend is built with Express.js and MongoDB, while the frontend uses React, Ant Design, and Axios.
+This project is a full-stack chatbot application that dynamically asks users questions, stores their answers in MongoDB, and displays the interaction in a user-friendly chat interface. The backend is built with Express.js and MongoDB, while the frontend uses React, Ant Design, and Axios. The application leverages the OpenAI API to generate conversational questions and provide AI-powered responses to user answers, enhancing interactivity.
 
 ## Table of Contents
 
@@ -16,13 +16,14 @@ This project is a full-stack chatbot application that asks users 10 questions, s
 
 ## Features
 
-- A chatbot that asks 10 predefined questions sequentially.
-- Backend session management to keep track of user progress.
-- MongoDB database to store user responses.
-- A conversational chat interface with bot questions on the left and user answers on the right.
-- Clean, responsive design using Ant Design (AntD).
-- Axios for making HTTP requests.
-- Error handling for network issues or invalid responses.
+- **Dynamic AI-Generated Questions:** The chatbot uses OpenAI's API to generate questions in real-time, making each session unique and conversational.
+- **AI Responses to User Answers:** After a user submits an answer, the chatbot responds to the user’s input using
+- **Session Management:** Backend session handling keeps track of user progress, storing both questions and answers in MongoDB.
+- **MongoDB Integration:** User responses and session information are stored in a MongoDB database for persistence.
+- **Frontend Chat Interface:** A conversational chat interface displays bot-generated questions on the left and user answers on the right, providing a clean and intuitive interaction.
+- **Responsive Design:** Built with Ant Design (AntD) for a clean and modern user interface.
+- **Axios for HTTP Requests:** Axios is used to handle API requests between the frontend and backend.
+- **Error Handling:** Graceful error handling is included for network issues, OpenAI API failures, or invalid user inputs.
 
 ## Tech Stack
 
