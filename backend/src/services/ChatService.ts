@@ -1,23 +1,35 @@
 import { Request, Response, Router } from 'express';
+import { OpenAI } from 'openai';
+import dotenv from 'dotenv';
 import Session from '../model';
 
 const router = Router();
 
-// Predefined questions
-const questions = [
-  'What is your favorite breed of cat, and why?',
-  'How do you think cats communicate with their owners?',
-  'Have you ever owned a cat? If so, what was their name and personality like?',
-  'Why do you think cats love to sleep in small, cozy places?',
-  'What’s the funniest or strangest behavior you’ve ever seen a cat do?',
-  'Do you prefer cats or kittens, and what’s the reason for your preference?',
-  'Why do you think cats are known for being independent animals?',
-  'How do you think cats manage to land on their feet when they fall?',
-  'What’s your favorite fact or myth about cats?',
-  'How would you describe the relationship between humans and cats in three words?',
-];
+dotenv.config();
 
-// Helper function to generate sessionId
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
+});
+
+// Function to call OpenAI and get a generated question
+const generateQuestion = async (): Promise<string> => {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: 'Generate a thought-provoking question about cats.' },
+      ],
+      max_tokens: 50,
+    });
+    return completion.choices[0].message.content as string;
+  } catch (error) {
+    console.error('Error generating question:', error);
+    throw new Error('Failed to generate question');
+  }
+};
+
+// Function to generate sessionId
 const generateSessionId = (): string => Math.random().toString(36).substring(7);
 
 // Start a new session
@@ -26,12 +38,17 @@ export const startSession = async (req: Request, res: Response) => {
     const newSession = new Session({
       sessionId: generateSessionId(),
       currentQuestion: 0,
-      questions: questions.map((q) => ({ question: q, answer: '' })),
+      questions: [],
     });
+
+    // Fetch the first question using OpenAI
+    const firstQuestion = await generateQuestion();
+    newSession.questions.push({ question: firstQuestion, answer: '' });
 
     await newSession.save();
     res.status(201).json({ sessionId: newSession.sessionId });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error starting session' });
   }
 };
@@ -73,18 +90,21 @@ export const submitAnswer = async (req: Request, res: Response) => {
     session.questions[session.currentQuestion].answer = answer;
     session.currentQuestion += 1;
 
-    if (session.currentQuestion >= questions.length) {
-      session.endTime = new Date();
+    // Generate the next question using OpenAI API
+    if (session.currentQuestion >= session.questions.length) {
+      const nextQuestion = await generateQuestion();
+      session.questions.push({ question: nextQuestion, answer: '' });
+    }
+
+    if (session.currentQuestion >= 10) {
+      session.endTime = new Date(); // End session after 10 questions
+      await session.save();
+      return res.json({ message: 'All questions answered, session complete' });
     }
 
     await session.save();
-
-    if (session.currentQuestion < questions.length) {
-      const nextQuestion = session.questions[session.currentQuestion].question;
-      res.json({ nextQuestion });
-    } else {
-      res.json({ message: 'All questions answered, session complete' });
-    }
+    const nextQuestion = session.questions[session.currentQuestion].question;
+    res.json({ nextQuestion });
   } catch (err) {
     res.status(500).json({ error: 'Error submitting answer' });
   }
