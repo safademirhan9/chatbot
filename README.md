@@ -64,9 +64,6 @@ brew install mongodb-community@7.0
 brew services start mongodb-community@7.0
 ```
 
-- Follow the installation instructions for your operating system.
-- Start the Neo4j server.
-
 ## Backend Setup:
 
 - Navigate to the `backend/` directory:
@@ -85,7 +82,7 @@ brew services start mongodb-community@7.0
   ```
   npm run dev
   ```
-- The backend server should now be running on `http://localhost:5000`.
+- The backend server should now be running on `http://localhost:3000`.
 
 ## Frontend Setup:
 
@@ -105,7 +102,7 @@ brew services start mongodb-community@7.0
 
 ## API Endpoints:
 
-**Base URL:** `http://localhost:5000`
+**Base URL:** `http://localhost:3000`
 
 **Endpoints:**
 POST `/session/start`
@@ -124,7 +121,7 @@ Submits the user's answer and returns the next question.
   cd backend
   npm run dev
   ```
-  The backend server should be running on `http://localhost:5000`.
+  The backend server should be running on `http://localhost:3000`.
   - **2. Start the Frontend:** From the `frontend/` directory, run:
   ```
   npm run dev
